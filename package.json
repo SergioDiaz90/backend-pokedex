@@ -1,0 +1,26 @@
+{
+  "name": "backend-pokedex",
+  "version": "1.0.0",
+  "description": "\"Api para consultar información de pokemons\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node dist/index.js",
+    "dev": "webpack --mode development && node dist/index.js",
+    "build": "webpack --mode production"
+  },
+  "author": "Sergio Diaz",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.7",
+    "@babel/preset-env": "^7.23.8",
+    "babel-loader": "^9.1.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
