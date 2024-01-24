@@ -8,7 +8,7 @@
     "start": "nodemon ./src/scripts/index.js",
     "dev": "webpack --mode development && node dist/index.js",
     "build": "webpack --mode production",
-    "start:prod" : "nodemon ./dist/scripts/index.js"
+    "start:prod": "nodemon ./dist/scripts/index.js"
   },
   "author": "Sergio Diaz",
   "license": "MIT",
@@ -24,6 +24,7 @@
     "copy-webpack-plugin": "^12.0.2",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "supports-color": "^9.4.0"
   }
 }
