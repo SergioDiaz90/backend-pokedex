@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     name: 'backend-pokedex',
@@ -6,7 +7,8 @@ module.exports = {
     target: 'node',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'index.js'
+        filename: 'scripts/index.js',
+        assetModuleFilename: 'src/[path]/[name][contenthash].[ext]'
     },
     resolve: {
         extensions: ['.js']
@@ -22,7 +24,15 @@ module.exports = {
             }
         ]
     },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: 'src/data-session', to: 'src/data-session' },
+                { from: 'src/environment', to: 'src/environment' },
+            ],
+        }),
+    ],
     optimization: {
-        minimize: false,
+        minimize: true,
     },
 }
