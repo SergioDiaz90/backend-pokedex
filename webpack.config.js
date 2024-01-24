@@ -6,7 +6,7 @@ module.exports = {
     entry: './src/scripts/index.js',
     target: 'node',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public'),
         filename: 'scripts/index.js',
         assetModuleFilename: 'src/[path]/[name][contenthash].[ext]'
     },
