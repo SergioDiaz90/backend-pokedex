@@ -1,30 +1,15 @@
 const express = require('express');
-const axios = require('axios');
-const jwt = require('jsonwebtoken');
+const authRoutes = require('../routes/handler-auth-routes');
+const pokemonRoutes = require('../routes/handler-pokemon-routes');
 
 const app = express();
 const PORT = 3000;
 
-const secretKey = 'yourSecretKey';
-
 app.use(express.json());
 
-const users = [
-    {
-        id: 1,
-        username: 'demoUser',
-        password: 'demoPassword',
-    },
-];
+app.use('/auth', authRoutes);
+app.use('/api', pokemonRoutes);
 
-// Middleware to verify JWT token
-const authenticateToken = (req, res, next) => {
-    const token = req.header('Authorization');
-    if (!token) return res.sendStatus(401);
-
-    jwt.verify(token, secretKey, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-};
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
