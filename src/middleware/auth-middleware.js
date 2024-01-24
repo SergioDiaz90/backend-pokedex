@@ -1,13 +1,22 @@
 const jwt = require('jsonwebtoken');
-
+const authController = require('../controllers/auth-controller');
 const secretKey = 'yourSecretKey';
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
     const token = req.header('Authorization');
-    if (!token) return res.sendStatus(401);
+    const sessions = await authController.loadSessions();
+
+    console.log('authenticateToken', { session: sessions[token] });
+    if (!token || !sessions[token]) {
+        return res.sendStatus(401);
+    }
 
     jwt.verify(token, secretKey, (err, user) => {
-        if (err) return res.sendStatus(403);
+        if (err) {
+            req.session.token = null;
+            return res.sendStatus(403);
+        }
+
         req.user = user;
         next();
     });

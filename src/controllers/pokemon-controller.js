@@ -1,35 +1,95 @@
 const axios = require('axios');
 const env = require('../environment/environment.json');
-let limit = '20';
-let offset = '20';
+const URL_FIRST_POKEMONS =  `${env.URL}/pokemon/?limit=20&offset=0`;
+let dataPagPokemons = undefined;
 
-const getInfoPokemon = async () => {
+const _getApi = async (url, method) => {
     try {
-        const response = await axios.get(`${env.URL}/ability/?limit=${limit}&offset=${offset}`);
-        console.log('getInfoPokemon', response);
+        let res = await axios.get(url);
+        return res.data;
     } catch (error) {
-        console.error('Error en getInfoPokemon:', error.message);
+        console.error(`Error en ${method}: `, error);
     }
 }
 
-const getPokemonForPage = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        
+const sortResults = (key, newPage) => {
+    if (!newPage) {
+        dataPagPokemons.results = {
+            [key] : dataPagPokemons.results
+        };
+    }
+
+    if (newPage) {
+        dataPagPokemons.results[key] = newPage;
     }
 }
 
-const getPokemonDetails = async (req, res) => {
-  // Lógica para obtener detalles de Pokémon utilizando la PokeAPI
-    try {
-        console.log('url', `${env.URL}/pokemon${req.params.id}`);
-        const response = await axios.get(`${env.URL}/pokemon/${req.params.id}`);
+const getItemsPokemon = async (objPokemon, type) => {
+    let url = undefined;
+    let response = undefined;
+
+    if (type === 'data') {
+        url = objPokemon.url;
+        response = await _getApi(url, 'getItemsPokemon');
+        objPokemon['data'] = response;
+
+        // console.log('getItemsPokemon', objPokemon);
+    }
+
+    if (type === 'sprites') {
+        url = objPokemon.data.sprites.front_default;
+        response = await _getApi(url, 'getItemsPokemon');
+        objPokemon.data['sprites'] = Buffer.from(response, 'binary').toString('base64');
+    }
+}
+
+const getUrlInfoPokemon = async (objPokemon) => {
+    for (let item in objPokemon) {
+        await getItemsPokemon(objPokemon[item], 'data');
+        await getItemsPokemon(objPokemon[item], 'sprites');
+        await getItemsPokemon(objPokemon[item], 'abilities');
+    }
+}
+
+const getInfoPokemon = async (req, res) => {
+    let results = dataPagPokemons.results;
+
+    for (let key in results) {
+        let objPokemon = results[key];
+        await getUrlInfoPokemon(objPokemon);
+    }
+    console.log('getInfoPokemon', results);
+}
+
+const getFirstInfoPokemon = async (req, res) => {
+    dataPagPokemons = await _getApi(URL_FIRST_POKEMONS, 'getFirstInfoPokemon');
+    // console.log('getFirstInfoPokemon', dataPagPokemons);
+    dataPagPokemons['number_page'] = [ 'page-0' ];
+    sortResults(dataPagPokemons['number_page'][0]);
+    await getInfoPokemon();
+    console.log('getFirstInfoPokemon - ok', req.session.user);
+    res.json(dataPagPokemons);
+}
+
+const changePagInfoPokemon = async (req, res) => {
+    let destiny = req.body.destiny;
+    let numberPage = req.body.number_page;
+    let results = dataPagPokemons.results;
+
+    // console.log('changePagInfoPokemon', dataPagPokemons.hasOwnProperty(numberPage));
+    if (!results.hasOwnProperty(numberPage)) {
+        // console.log('changePagInfoPokemon', {body: req.body, url: dataPagPokemons[destiny]});
+        const response = await _getApi(dataPagPokemons[destiny], 'changePagInfoPokemon');
+        dataPagPokemons.count = response.count;
+        dataPagPokemons.next = response.next;
+        dataPagPokemons.previous = response.previous;
+        dataPagPokemons['number_page'].push(numberPage);
+        sortResults(numberPage, response.results);
         await getInfoPokemon();
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching Pokémon details' });
+        console.log('changePagInfoPokemon', dataPagPokemons);
     }
-};
 
-module.exports = { getPokemonDetails };
+    res.json(dataPagPokemons.results[numberPage]);
+}
+
+module.exports = { getFirstInfoPokemon, changePagInfoPokemon };
