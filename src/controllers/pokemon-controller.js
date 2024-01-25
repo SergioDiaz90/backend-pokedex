@@ -37,9 +37,7 @@ const getItemsPokemon = async (objPokemon, type) => {
     }
 
     if (type === 'sprites') {
-        url = objPokemon.data.sprites.front_default;
-        response = await _getApi(url, 'getItemsPokemon');
-        objPokemon.data['sprites'] = Buffer.from(response, 'binary').toString('base64');
+        objPokemon.data['sprites'] = objPokemon.data.sprites.front_default;
     }
 }
 

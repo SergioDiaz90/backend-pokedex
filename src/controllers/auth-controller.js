@@ -22,7 +22,7 @@ const loadTokens = async () => {
 // Guardar sesiones en el archivo JSON
 const saveTokens = async (token) => {
     try {
-        await fs.writeFile('src/data-session/tokens.json', JSON.stringify(token));
+        await fs.writeFile('./src/data-session/tokens.json', JSON.stringify(token));
     } catch (error) {
         console.error('saveSessions', error);
     }
@@ -30,7 +30,7 @@ const saveTokens = async (token) => {
 
 const loadSessions = async () => {
     try {
-        const content = await fs.readFile('src/data-session/sessions.json', 'utf-8');
+        const content = await fs.readFile('./src/data-session/sessions.json', 'utf-8');
         return JSON.parse(content) || {};
     } catch (error) {
         console.error('loadSessions', error);
@@ -67,7 +67,7 @@ const login = async (req, res) => {
             await saveTokens(tokenSave);
             console.log('tokensInit', tokenSave );
         } else {
-            return res.status(400).json({ message: 'Sesión ya existente', accessToken: sessions[tokenSave[user.username]].token });
+            return res.status(200).json({ message: 'Sesión ya existente', accessToken: sessions[tokenSave[user.username]].token });
         }
         
         const userData = {
@@ -92,13 +92,16 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
   // Lógica de cierre de sesión
     try {
+        console.log('logout', req)
         const token = req.header('Authorization');
         const sessions = await loadSessions();
+        console.log('token', { token, session: sessions[token], sessions });
         delete sessions[token];
         await saveSessions(sessions);
     
         const tokenSave = await loadTokens();
         const searchToken = Object.keys(tokenSave).find( item => tokenSave[item] === token);
+        console.log('searchtoken', tokenSave[searchToken], tokenSave);
         delete tokenSave[searchToken];
         await saveTokens(tokenSave);
 
